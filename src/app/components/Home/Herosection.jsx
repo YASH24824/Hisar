@@ -144,7 +144,7 @@ const Hero = () => {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-3 mb-6">
                 <Link
-                  href="/about-us#contact"
+                  href="/Contact"
                   className="group bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-semibold transition-all inline-flex items-center justify-center gap-2 text-sm md:text-base shadow-lg hover:shadow-emerald-600/30"
                 >
                   <Sparkles size={16} />

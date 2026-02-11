@@ -13,10 +13,10 @@ import {
 const Footer = () => {
   const quickLinks = [
     { name: "Home", href: "/" },
-    { name: "About & Services", href: "/about-us" },
-    { name: "Gallery", href: "/gallery" },
+
+    { name: "Gallery", href: "/Gallery" },
     { name: "Testimonials", href: "/testimonials" },
-    { name: "Contact", href: "/about-us#contact" },
+    { name: "Contact", href: "/Contact" },
   ];
 
   const services = [
@@ -170,7 +170,7 @@ const Footer = () => {
             <Phone className="w-4 h-4 text-white" />
           </div>
           <span className="text-white">
-            9812166286 / 8168031685
+            9812166286
           </span>
         </li>
 

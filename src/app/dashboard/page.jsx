@@ -189,9 +189,64 @@ export default function Dashboard() {
         </div>
 
         {/* Section 1: Header with Image Management title and Logout button (Desktop) */}
+        <div className="hidden md:flex mb-8 items-center justify-between rounded-2xl p-6">
+          <div className="text-center flex-1">
+            <h1 className="text-4xl font-sans font-semibold text-blue-950">Image Management</h1>
+          </div>
+          <div className="flex-shrink-0">
+            <button
+              onClick={() => setShowLogoutConfirm(true)}
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 px-5 py-3 text-white shadow-sm transition-all hover:scale-105 hover:shadow-md"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
 
-
-  
+        {/* Section 2: Upload Images Box */}
+        <div className="mb-8 rounded-2xl bg-white p-6 shadow-sm">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-xl font-sans font-semibold text-blue-950">Upload Images</h2>
+        
+          </div>
+          
+          <div className="rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-8 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-100 to-indigo-100">
+              <Upload className="h-8 w-8 text-blue-950" />
+            </div>
+            <h3 className="mb-2 text-lg font-sans font-medium text-gray-700">Drag & drop images here</h3>
+            <p className="mb-6 font-sans text-gray-500">or click to browse files</p>
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <input
+                type="file"
+                id="file-upload"
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileUpload}
+                disabled={uploading}
+              />
+              <label
+                htmlFor="file-upload"
+                className={`cursor-pointer rounded-xl bg-gradient-to-r from-blue-950 to-blue-950 
+                  px-6 py-3 font-medium text-white font-sans shadow-sm transition-all 
+                  hover:shadow-md hover:text-blue-950 hover:from-white hover:to-white
+                  ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                {uploading ? (
+                  <span className="flex items-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    Uploading...
+                  </span>
+                ) : (
+                  "Browse Files"
+                )}
+              </label>
+              <p className="text-sm text-gray-500">JPG, PNG, WebP up to 10MB</p>
+            </div>
+          </div>
+        </div>
 
         {/* Section 3: Images Gallery */}
         <div className="rounded-2xl bg-white shadow-lg overflow-hidden">
@@ -296,7 +351,13 @@ export default function Dashboard() {
                             </button>
                             
                             {/* Download Button */}
-                         
+                            <button
+                              onClick={() => handleDownloadImage(img)}
+                              className="rounded-full bg-white/90 p-2 shadow-md backdrop-blur-sm transition-all hover:scale-110 hover:bg-white"
+                              title="Download Image"
+                            >
+                              <Download className="h-3.5 w-3.5 md:h-4 md:w-4 text-gray-700" />
+                            </button>
                           </div>
                         </div>
                         
@@ -363,7 +424,12 @@ export default function Dashboard() {
                 <h3 className="text-lg md:text-xl font-sans font-semibold text-blue-950">Image Details</h3>
                 <p className="text-xs md:text-sm text-blue-950">View and manage image information</p>
               </div>
-          
+              <button
+                onClick={() => setShowImagePreview(false)}
+                className="rounded-lg p-2 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
             
             {/* Modal Content */}
@@ -378,7 +444,13 @@ export default function Dashboard() {
                       className="h-[200px] md:h-[250px] w-full rounded-lg object-contain"
                     />
                   </div>
-               
+                  <button
+                    onClick={() => handleDownloadImage(selectedImage)}
+                    className="flex items-center justify-center gap-2 rounded-lg font-sans bg-blue-950 px-4 py-3 font-medium text-white hover:text-blue-950 hover:bg-white hover:border-gray-300 border"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download Image
+                  </button>
                 </div>
                 
                 {/* Image Details */}

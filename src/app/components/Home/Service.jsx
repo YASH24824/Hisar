@@ -2,6 +2,7 @@
 import React from "react";
 import Image from "next/image";
 import { Target, Hospital, Heart, Zap, Shield, Thermometer, Activity, Eye, Brain, Stethoscope } from "lucide-react";
+import Link from "next/link";
 
 const ServicesPage = () => {
   const services = [
@@ -117,30 +118,36 @@ const ServicesPage = () => {
           </p>
 
           {/* Learn More */}
-          <span
-            className="text-xs text-blue-950 font-medium
-            opacity-100
-            transition-opacity duration-300"
-          >
-            Learn More →
-          </span>
+       
+<Link href="/Services">
+  <span
+    className="text-xs text-blue-950 font-medium
+    opacity-100
+    transition-opacity duration-300 cursor-pointer"
+  >
+    Learn More →
+  </span>
+</Link>
+
         </div>
       </div>
     ))}
   </div>
 
   {/* View Services Button */}
-  <div className="flex justify-center">
+ 
+<div className="flex justify-center">
+  <Link href="/Services">
     <button
       className="px-6 py-3 text-sm md:text-base font-semibold 
       text-white bg-blue-950 rounded-full
       hover:bg-blue-950 hover:shadow-lg
-      transition-all duration-300 cursor cursor-pointer"
-      onClick={() => router.push("/services")}
+      transition-all duration-300 cursor-pointer"
     >
       View Services
     </button>
-  </div>
+  </Link>
+</div>
 </div>
 
           {/* Right Column: Modern Facility */}
@@ -199,7 +206,7 @@ const ServicesPage = () => {
                   className="object-contain p-4 group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute bottom-3 left-3 right-3">
-                  <span className="text-blue-950 text-xs font-semibold bg-white/80 backdrop-blur-sm px-2 py-1 rounded">
+                  <span className="text-white text-xs font-semibold bg-black/80 backdrop-blur-sm px-2 py-1 rounded">
                     Latest Equipment
                   </span>
                 </div>

@@ -118,14 +118,14 @@ const HorizontalLocationBanner = () => {
           {/* Action Buttons */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
             <Link
-              href="/about-us#contact"
+              href="/Contact"
               className="bg-white hover:bg-blue-50 text-blue-950 px-4 md:px-5 py-3 rounded-lg font-semibold text-center transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
             >
               <Phone className="w-4 h-4 md:w-5 md:h-5" />
               Book Appointment
             </Link>
             <Link
-              href="/about-us#services"
+              href="/Services"
               className="bg-transparent border-2 border-white text-white hover:bg-white/10 px-4 md:px-5 py-3 rounded-lg font-semibold text-center transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
             >
               <Eye className="w-4 h-4 md:w-5 md:h-5" />

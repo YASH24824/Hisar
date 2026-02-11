@@ -89,14 +89,14 @@ const AboutSection = () => {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
                 <Link
-                  href="/about-us#services"
+                  href="/Services"
                   className="group bg-blue-950 hover:bg-white hover:text-blue-950 text-white px-6 md:px-8 py-3 md:py-4 rounded-lg font-sans font-semibold transition-all duration-300 hover:shadow-lg inline-flex items-center justify-center gap-2 text-sm md:text-base"
                 >
                   Read More About Our Services
                   <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
-                  href="/about-us#contact"
+                  href="/Contact"
                   className="group bg-blue-950  text-white hover:bg-white hover:text-blue-950 px-6 md:px-8 py-3 md:py-4 hover:shadow-lg rounded-lg font-semibold transition-all duration-300 inline-flex items-center justify-center gap-2 text-sm md:text-base hover:border-emerald-700"
                 >
                   Book Appointment
