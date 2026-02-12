@@ -174,7 +174,7 @@ export default function TopServices() {
   }, []);
 
   return (
-    <section className="bg-white py-16 md:py-20">
+    <section className="bg-gradient-to-b from-blue-50 to-white py-16 md:py-20">
       {/* Notification */}
       {notification.show && (
         <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 rounded-xl px-5 py-3 shadow-xl backdrop-blur-sm animate-slideIn ${
