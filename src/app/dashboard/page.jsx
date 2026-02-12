@@ -2,26 +2,229 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, Search, Upload, Image as ImageIcon, Eye, Download, X } from "lucide-react";
+import { LogOut, Search, Image as ImageIcon, Eye, Download, X } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
+// UploadBox Component
+function UploadBox({ onUploadSuccess }) {
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [fileName, setFileName] = useState("");
+  const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // Handle file selection
+  const handleFile = (file) => {
+    if (file && file.type.startsWith("image/")) {
+      setFile(file);
+      setFileName(file.name);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => setIsDragging(false);
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  };
+
+  const handleFileInput = (e) => {
+    const file = e.target.files[0];
+    if (file) handleFile(file);
+  };
+
+  // Upload image to Next.js API
+  const handleUpload = async () => {
+    if (!file) return;
+
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("title", file.name);
+      formData.append("description", description);
+
+      // Call Next.js API route
+      const res = await fetch("/api/admin/image", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Upload failed");
+
+      // Success toast
+      toast.success("Image uploaded successfully! 🎉", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+
+      // Reset form
+      setFile(null);
+      setPreview(null);
+      setFileName("");
+      setDescription("");
+      
+      // Cleanup preview URL
+      if (preview) {
+        URL.revokeObjectURL(preview);
+      }
+
+      // Pass uploaded image to parent if needed
+      onUploadSuccess?.(data.image);
+
+    } catch (error) {
+      console.error("Upload failed:", error);
+      toast.error(`Upload failed: ${error.message}`, {
+        position: "top-right",
+        autoClose: 5000,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removePreview = () => {
+    if (preview) {
+      URL.revokeObjectURL(preview);
+    }
+    setFile(null);
+    setPreview(null);
+    setFileName("");
+    setDescription("");
+  };
+
+  return (
+    <div className="w-full rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      {/* Drag & Drop Area */}
+      <div
+        className={`mb-6 cursor-pointer rounded-xl border-2 border-dashed transition-all duration-300 ${
+          isDragging
+            ? "border-blue-500 bg-blue-50/50"
+            : "border-gray-300 hover:border-blue-400 hover:bg-gray-50/50"
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={() => document.getElementById("file-input")?.click()}
+      >
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-indigo-100">
+            <svg className="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+          </div>
+          <h4 className="mb-1 font-medium text-gray-800">Drag & Drop your images here</h4>
+          <p className="mb-4 text-sm text-gray-600">or click to browse files</p>
+          <p className="text-xs text-gray-500">Supports JPG, PNG, WebP • Max 10MB</p>
+        </div>
+        <input
+          id="file-input"
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileInput}
+        />
+      </div>
+
+      {/* Preview & Info */}
+      {fileName && (
+        <div className="mb-4 rounded-lg bg-blue-50 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div className="overflow-hidden">
+                <p className="max-w-[180px] truncate text-sm font-medium text-gray-800">{fileName}</p>
+                <p className="text-xs text-gray-500">Ready to upload</p>
+              </div>
+            </div>
+            <button 
+              onClick={removePreview} 
+              className="rounded-full p-2 text-gray-500 transition hover:bg-white hover:text-gray-700"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Image Preview */}
+      {preview && (
+        <div className="mb-6 rounded-xl border border-gray-200">
+          <div className="relative aspect-video overflow-hidden bg-gray-100">
+            <img src={preview} alt="Preview" className="h-full w-full object-contain" />
+            <button 
+              onClick={removePreview} 
+              className="absolute right-3 top-3 rounded-full bg-white/90 p-2 backdrop-blur-sm transition hover:scale-110"
+            >
+              <X className="h-4 w-4 text-gray-700" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Description */}
+      <div className="mb-6">
+        <label className="mb-2 block text-sm font-medium text-gray-700">Image Description</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Write a short description about this image..."
+          rows={3}
+          className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+        />
+      </div>
+
+      {/* Upload Button */}
+      <button
+        onClick={handleUpload}
+        disabled={!preview || loading}
+        className={`w-full cursor-pointer rounded-xl py-3.5 font-medium transition-all duration-300 ${
+          preview && !loading
+            ? "bg-blue-950 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]"
+            : "cursor-not-allowed bg-blue-950 text-white"
+        }`}
+      >
+        {loading ? (
+          <span className="flex items-center justify-center gap-2">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+            Uploading...
+          </span>
+        ) : (
+          "Upload Image"
+        )}
+      </button>
+    </div>
+  );
+}
+
+// Main Dashboard Component
 export default function Dashboard() {
   const router = useRouter();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [images, setImages] = useState([]);
-  const [uploading, setUploading] = useState(false);
   
   // Image preview modal states
   const [selectedImage, setSelectedImage] = useState(null);
   const [showImagePreview, setShowImagePreview] = useState(false);
-  
-  // Notification state
-  const [notification, setNotification] = useState({
-    show: false,
-    message: "",
-    type: "success"
-  });
 
   // Page ready
   useEffect(() => {
@@ -39,43 +242,11 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error("Failed to fetch images:", error);
-    }
-  };
-
-  // Handle file upload
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setUploading(true);
-    const formData = new FormData();
-    formData.append("image", file);
-    formData.append("title", file.name);
-
-    try {
-      const res = await fetch("/api/admin/image", {
-        method: "POST",
-        body: formData,
+      toast.error("Failed to fetch images", {
+        position: "top-right",
+        autoClose: 3000,
       });
-
-      if (res.ok) {
-        fetchImages();
-        showNotification("Image uploaded successfully!", "success");
-      }
-    } catch (error) {
-      console.error("Upload failed:", error);
-      showNotification("Upload failed. Please try again.", "error");
-    } finally {
-      setUploading(false);
     }
-  };
-
-  // Show notification
-  const showNotification = (message, type = "success") => {
-    setNotification({ show: true, message, type });
-    setTimeout(() => {
-      setNotification({ show: false, message: "", type: "success" });
-    }, 3000);
   };
 
   // Handle view image - shows modal with title and description
@@ -98,16 +269,17 @@ export default function Dashboard() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      showNotification("Download started!", "success");
+      toast.success("Download started! 📥", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     } catch (error) {
       console.error("Download failed:", error);
-      showNotification("Download failed. Please try again.", "error");
+      toast.error("Download failed. Please try again.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     }
-  };
-
-  // Handle more options
-  const handleMoreOptions = (img) => {
-    console.log('More options for:', img);
   };
 
   // Logout function
@@ -117,8 +289,14 @@ export default function Dashboard() {
         method: "POST",
         credentials: "include",
       });
+      toast.success("Logged out successfully", {
+        position: "top-right",
+        autoClose: 2000,
+      });
     } finally {
-      router.replace("/Login");
+      setTimeout(() => {
+        router.replace("/Login");
+      }, 500);
     }
   };
 
@@ -139,35 +317,20 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-6">
-      <main className="mx-auto mb-10 max-w-7xl">
-        {/* Notification */}
-        {notification.show && (
-          <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 rounded-xl px-5 py-3 shadow-xl backdrop-blur-sm animate-slideIn ${
-            notification.type === "success" 
-              ? "bg-green-50/95 border border-green-200 text-green-800" 
-              : "bg-red-50/95 border border-red-200 text-red-800"
-          }`}>
-            <div className="rounded-full bg-white p-1.5 shadow-sm">
-              {notification.type === "success" ? (
-                <svg className="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              ) : (
-                <svg className="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
-            </div>
-            <span className="font-medium">{notification.message}</span>
-            <button
-              onClick={() => setNotification({ show: false })}
-              className="ml-2 rounded-full p-1 hover:bg-white/50"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        )}
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
 
+      <main className="mx-auto mb-10 max-w-7xl">
         {/* Mobile Header with Logout on Top Right */}
         <div className="md:hidden mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -204,48 +367,9 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Section 2: Upload Images Box */}
-        <div className="mb-8 rounded-2xl bg-white p-6 shadow-sm">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-sans font-semibold text-blue-950">Upload Images</h2>
-        
-          </div>
-          
-          <div className="rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-8 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-100 to-indigo-100">
-              <Upload className="h-8 w-8 text-blue-950" />
-            </div>
-            <h3 className="mb-2 text-lg font-sans font-medium text-gray-700">Drag & drop images here</h3>
-            <p className="mb-6 font-sans text-gray-500">or click to browse files</p>
-            
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <input
-                type="file"
-                id="file-upload"
-                className="hidden"
-                accept="image/*"
-                onChange={handleFileUpload}
-                disabled={uploading}
-              />
-              <label
-                htmlFor="file-upload"
-                className={`cursor-pointer rounded-xl bg-gradient-to-r from-blue-950 to-blue-950 
-                  px-6 py-3 font-medium text-white font-sans shadow-sm transition-all 
-                  hover:shadow-md hover:text-blue-950 hover:from-white hover:to-white
-                  ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}
-              >
-                {uploading ? (
-                  <span className="flex items-center gap-2">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                    Uploading...
-                  </span>
-                ) : (
-                  "Browse Files"
-                )}
-              </label>
-              <p className="text-sm text-gray-500">JPG, PNG, WebP up to 10MB</p>
-            </div>
-          </div>
+        {/* Section 2: UploadBox Component */}
+        <div className="mb-8">
+          <UploadBox onUploadSuccess={fetchImages} />
         </div>
 
         {/* Section 3: Images Gallery */}
@@ -271,17 +395,17 @@ export default function Dashboard() {
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-950" />
                   <input
                     type="text"
-                    placeholder="Search"
+                    placeholder="Search images..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full md:min-w-[280px] rounded-lg text-blue-950 font-sans border border-gray-300 bg-white py-2.5 pl-10 pr-10"
+                    className="w-full md:min-w-[280px] rounded-lg text-blue-950 font-sans border border-gray-300 bg-white py-2.5 pl-10 pr-10 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
-                      ✕
+                      <X className="h-4 w-4" />
                     </button>
                   )}
                 </div>
@@ -304,13 +428,6 @@ export default function Dashboard() {
                 <p className="mb-6 max-w-md text-gray-500">
                   Upload your first image to start building your collection.
                 </p>
-                <button 
-                  onClick={() => document.getElementById('file-upload')?.click()}
-                  className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-950 to-blue-950 px-5 py-2.5 font-medium text-white shadow-md hover:shadow-lg"
-                >
-                  <Upload className="h-4 w-4" />
-                  Upload First Image
-                </button>
               </div>
             ) : (
               <>
@@ -330,12 +447,12 @@ export default function Dashboard() {
                         {/* Image Container */}
                         <div className="relative aspect-square overflow-hidden bg-gray-100">
                           <img
-                            src={img.imageUrl || `https://via.placeholder.com/400x400/3B82F6/FFFFFF?text=Image+${index + 1}`}
+                            src={img.imageUrl}
                             alt={img.title || img.filename || "Gallery image"}
                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                             onError={(e) => {
                               e.target.onerror = null;
-                              e.target.src = `https://via.placeholder.com/400x400/6B7280/FFFFFF?text=Image+Error`;
+                              e.target.src = `https://via.placeholder.com/400x400/6B7280/FFFFFF?text=Error`;
                             }}
                           />
                           
@@ -367,6 +484,11 @@ export default function Dashboard() {
                             <h4 className="truncate text-sm font-semibold text-gray-900">
                               {img.title || img.filename || `Image ${index + 1}`}
                             </h4>
+                            {img.description && (
+                              <p className="mt-1 text-xs text-gray-500 line-clamp-2">
+                                {img.description}
+                              </p>
+                            )}
                           </div>
                           
                           {/* Meta Info */}
@@ -403,7 +525,8 @@ export default function Dashboard() {
                     <span className="text-wrap font-sans font-semibold text-blue-950">
                       Found {images.filter(img => 
                         img.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        img.filename?.toLowerCase().includes(searchQuery.toLowerCase())
+                        img.filename?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        img.description?.toLowerCase().includes(searchQuery.toLowerCase())
                       ).length} images
                     </span>
                   </div>
@@ -437,16 +560,20 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                 {/* Image Display */}
                 <div className="flex flex-col">
-                  <div className="mb-4 flex-1 rounded-lg border border-gray-200 bg-gray-100 p-4">
+                  <div className="mb-4 flex-1 rounded-lg border border-gray-200 bg-gray-100 p-4 flex items-center justify-center">
                     <img
                       src={selectedImage.imageUrl}
                       alt={selectedImage.title || selectedImage.filename}
-                      className="h-[200px] md:h-[250px] w-full rounded-lg object-contain"
+                      className="max-h-[300px] w-auto max-w-full rounded-lg object-contain"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = `https://via.placeholder.com/400x400/6B7280/FFFFFF?text=Error`;
+                      }}
                     />
                   </div>
                   <button
                     onClick={() => handleDownloadImage(selectedImage)}
-                    className="flex items-center justify-center gap-2 rounded-lg font-sans bg-blue-950 px-4 py-3 font-medium text-white hover:text-blue-950 hover:bg-white hover:border-gray-300 border"
+                    className="flex items-center justify-center gap-2 rounded-lg font-sans bg-blue-950 px-4 py-3 font-medium text-white hover:text-blue-950 hover:bg-white hover:border-gray-300 border transition-all"
                   >
                     <Download className="h-4 w-4" />
                     Download Image
@@ -460,12 +587,12 @@ export default function Dashboard() {
                     <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
                       <div>
                         <p className="text-sm font-sans font-medium text-blue-950">Title</p>
-                        <p className="text-gray-900">{selectedImage.title || selectedImage.filename || "Untitled"}</p>
+                        <p className="text-gray-900 break-words">{selectedImage.title || selectedImage.filename || "Untitled"}</p>
                       </div>
                       {selectedImage.description && (
                         <div>
                           <p className="text-sm font-sans font-medium text-blue-950">Description</p>
-                          <p className="text-gray-900">{selectedImage.description}</p>
+                          <p className="text-gray-900 break-words">{selectedImage.description}</p>
                         </div>
                       )}
                       <div className="grid grid-cols-2 gap-4">
@@ -507,7 +634,7 @@ export default function Dashboard() {
               <div className="flex flex-col sm:flex-row justify-end gap-3">
                 <button
                   onClick={() => setShowImagePreview(false)}
-                  className="rounded-lg border border-gray-300 px-4 py-2 font-sans font-medium text-gray-700 hover:bg-gray-50"
+                  className="rounded-lg border border-gray-300 px-4 py-2 font-sans font-medium text-gray-700 hover:bg-gray-50 transition-all"
                 >
                   Close
                 </button>
