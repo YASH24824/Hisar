@@ -170,22 +170,7 @@ export default function Dashboard() {
 
         {/* Mobile Header with Logout on Top Right */}
         <div className="md:hidden mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-950 to-blue-950 flex items-center justify-center">
-              <ImageIcon className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-sans font-semibold text-blue-950">Image Management</h1>
-              <p className="text-xs text-blue-950">Admin Dashboard</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setShowLogoutConfirm(true)}
-            className="rounded-xl bg-gradient-to-r from-red-500 to-rose-500 p-2.5 text-white"
-            title="Logout"
-          >
-            <LogOut className="h-5 w-5" />
-          </button>
+          
         </div>
 
         {/* Section 1: Header with Image Management title and Logout button (Desktop) */}
