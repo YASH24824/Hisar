@@ -2,7 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, Search, Image as ImageIcon, Eye, Download, X } from "lucide-react";
+import { 
+  LogOut, 
+  Search, 
+  Image as ImageIcon, 
+  Eye, 
+  Download, 
+  X,
+  Upload,
+  Trash2,
+  Loader2,
+  CheckCircle,
+  AlertCircle
+} from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -55,7 +67,6 @@ function UploadBox({ onUploadSuccess }) {
       formData.append("title", file.name);
       formData.append("description", description);
 
-      // Call Next.js API route
       const res = await fetch("/api/admin/image", {
         method: "POST",
         body: formData,
@@ -65,10 +76,10 @@ function UploadBox({ onUploadSuccess }) {
 
       if (!res.ok) throw new Error(data.message || "Upload failed");
 
-      // Success toast
       toast.success("Image uploaded successfully! 🎉", {
         position: "top-right",
         autoClose: 3000,
+        icon: <CheckCircle className="h-5 w-5 text-green-500" />
       });
 
       // Reset form
@@ -77,12 +88,10 @@ function UploadBox({ onUploadSuccess }) {
       setFileName("");
       setDescription("");
       
-      // Cleanup preview URL
       if (preview) {
         URL.revokeObjectURL(preview);
       }
 
-      // Pass uploaded image to parent if needed
       onUploadSuccess?.(data.image);
 
     } catch (error) {
@@ -90,6 +99,7 @@ function UploadBox({ onUploadSuccess }) {
       toast.error(`Upload failed: ${error.message}`, {
         position: "top-right",
         autoClose: 5000,
+        icon: <AlertCircle className="h-5 w-5 text-red-500" />
       });
     } finally {
       setLoading(false);
@@ -112,8 +122,8 @@ function UploadBox({ onUploadSuccess }) {
       <div
         className={`mb-6 cursor-pointer rounded-xl border-2 border-dashed transition-all duration-300 ${
           isDragging
-            ? "border-blue-500 bg-blue-50/50"
-            : "border-gray-300 hover:border-blue-400 hover:bg-gray-50/50"
+            ? "border-blue-950 bg-blue-50/50"
+            : "border-gray-300 hover:border-blue-950 hover:bg-gray-50/50"
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -122,13 +132,11 @@ function UploadBox({ onUploadSuccess }) {
       >
         <div className="flex flex-col items-center justify-center p-8 text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-indigo-100">
-            <svg className="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
+            <Upload className="h-8 w-8 text-blue-600" />
           </div>
-          <h4 className="mb-1 font-medium text-gray-800">Drag & Drop your images here</h4>
-          <p className="mb-4 text-sm text-gray-600">or click to browse files</p>
-          <p className="text-xs text-gray-500">Supports JPG, PNG, WebP • Max 10MB</p>
+          <h4 className="mb-1 font-sans text-blue-950">Drag & Drop your images here</h4>
+          <p className="mb-4 text-sm text-blue-950">or click to browse files</p>
+          <p className="text-xs text-blue-950">Supports JPG, PNG, WebP • Max 10MB</p>
         </div>
         <input
           id="file-input"
@@ -145,9 +153,7 @@ function UploadBox({ onUploadSuccess }) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+                <ImageIcon className="h-5 w-5 text-blue-600" />
               </div>
               <div className="overflow-hidden">
                 <p className="max-w-[180px] truncate text-sm font-medium text-gray-800">{fileName}</p>
@@ -181,13 +187,13 @@ function UploadBox({ onUploadSuccess }) {
 
       {/* Description */}
       <div className="mb-6">
-        <label className="mb-2 block text-sm font-medium text-gray-700">Image Description</label>
+        <label className="mb-2 block text-wrap font-sans font-medium text-blue-950">Image Description</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Write a short description about this image..."
           rows={3}
-          className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+          className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-800 placeholder:font-sans     focus:border-blue-950 focus:outline-none focus:ring-2 focus:ring-blue-100"
         />
       </div>
 
@@ -198,12 +204,12 @@ function UploadBox({ onUploadSuccess }) {
         className={`w-full cursor-pointer rounded-xl py-3.5 font-medium transition-all duration-300 ${
           preview && !loading
             ? "bg-blue-950 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]"
-            : "cursor-not-allowed bg-blue-950 text-white"
+            : "cursor-not-allowed bg-blue-950 text-white opacity-50"
         }`}
       >
         {loading ? (
           <span className="flex items-center justify-center gap-2">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+            <Loader2 className="h-4 w-4 animate-spin" />
             Uploading...
           </span>
         ) : (
@@ -225,6 +231,12 @@ export default function Dashboard() {
   // Image preview modal states
   const [selectedImage, setSelectedImage] = useState(null);
   const [showImagePreview, setShowImagePreview] = useState(false);
+  
+  // Delete modal states
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [imageToDelete, setImageToDelete] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedImages, setSelectedImages] = useState([]);
 
   // Page ready
   useEffect(() => {
@@ -245,6 +257,7 @@ export default function Dashboard() {
       toast.error("Failed to fetch images", {
         position: "top-right",
         autoClose: 3000,
+        icon: <AlertCircle className="h-5 w-5 text-red-500" />
       });
     }
   };
@@ -253,6 +266,47 @@ export default function Dashboard() {
   const handleViewImage = (img) => {
     setSelectedImage(img);
     setShowImagePreview(true);
+  };
+
+  // Handle delete image
+  const handleDeleteClick = (img) => {
+    setImageToDelete(img._id);
+    setIsDeleteModalOpen(true);
+  };
+
+  // Delete images API call
+  const deleteImages = async (ids) => {
+    try {
+      setIsProcessing(true);
+      const res = await fetch("/api/admin/image", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Delete failed");
+
+      setImages((prev) => prev.filter((img) => !ids.includes(img._id)));
+      setSelectedImages([]);
+      setIsDeleteModalOpen(false);
+      setImageToDelete(null);
+
+      toast.success(`Deleted image${ids.length > 1 ? "s" : ""} successfully`, {
+        position: "top-right",
+        autoClose: 3000,
+        icon: <CheckCircle className="h-5 w-5 text-green-500" />
+      });
+    } catch (error) {
+      console.error("Delete failed:", error);
+      toast.error(error.message || "Delete failed", {
+        position: "top-right",
+        autoClose: 3000,
+        icon: <AlertCircle className="h-5 w-5 text-red-500" />
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   // Handle download image
@@ -269,15 +323,17 @@ export default function Dashboard() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      toast.success("Download started! 📥", {
+      toast.success("Download started!", {
         position: "top-right",
         autoClose: 3000,
+        icon: <CheckCircle className="h-5 w-5 text-green-500" />
       });
     } catch (error) {
       console.error("Download failed:", error);
       toast.error("Download failed. Please try again.", {
         position: "top-right",
         autoClose: 3000,
+        icon: <AlertCircle className="h-5 w-5 text-red-500" />
       });
     }
   };
@@ -292,6 +348,7 @@ export default function Dashboard() {
       toast.success("Logged out successfully", {
         position: "top-right",
         autoClose: 2000,
+        icon: <CheckCircle className="h-5 w-5 text-green-500" />
       });
     } finally {
       setTimeout(() => {
@@ -328,6 +385,7 @@ export default function Dashboard() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
+        theme="light"
       />
 
       <main className="mx-auto mb-10 max-w-7xl">
@@ -344,7 +402,7 @@ export default function Dashboard() {
           </div>
           <button
             onClick={() => setShowLogoutConfirm(true)}
-            className="rounded-xl bg-gradient-to-r from-red-500 to-rose-500 p-2.5 text-white"
+            className="rounded-xl bg-gradient-to-r from-red-500 to-rose-500 p-2.5 text-white shadow-md transition-all hover:scale-105 hover:shadow-lg"
             title="Logout"
           >
             <LogOut className="h-5 w-5" />
@@ -359,7 +417,7 @@ export default function Dashboard() {
           <div className="flex-shrink-0">
             <button
               onClick={() => setShowLogoutConfirm(true)}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 px-5 py-3 text-white shadow-sm transition-all hover:scale-105 hover:shadow-md"
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 px-5 py-3 text-white shadow-md transition-all hover:scale-105 hover:shadow-lg"
             >
               <LogOut className="h-4 w-4" />
               <span>Logout</span>
@@ -475,6 +533,15 @@ export default function Dashboard() {
                             >
                               <Download className="h-3.5 w-3.5 md:h-4 md:w-4 text-gray-700" />
                             </button>
+
+                            {/* Delete Button */}
+                            <button
+                              onClick={() => handleDeleteClick(img)}
+                              className="rounded-full  p-2 shadow-md backdrop-blur-sm transition-all hover:scale-110 bg-red-500 hover:text-white"
+                              title="Delete Image"
+                            >
+                              <Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                            </button>
                           </div>
                         </div>
                         
@@ -539,7 +606,7 @@ export default function Dashboard() {
 
       {/* Image Preview Modal */}
       {showImagePreview && selectedImage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fadeIn">
           <div className="w-full max-w-4xl animate-scaleIn rounded-2xl bg-white shadow-2xl overflow-hidden">
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 md:px-6 py-4">
@@ -549,7 +616,7 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={() => setShowImagePreview(false)}
-                className="rounded-lg p-2 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                className="rounded-lg p-2 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-all"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -573,9 +640,9 @@ export default function Dashboard() {
                   </div>
                   <button
                     onClick={() => handleDownloadImage(selectedImage)}
-                    className="flex items-center justify-center gap-2 rounded-lg font-sans bg-blue-950 px-4 py-3 font-medium text-white hover:text-blue-950 hover:bg-white hover:border-gray-300 border transition-all"
+                    className="flex items-center justify-center gap-2 rounded-lg font-sans bg-blue-950 px-4 py-3 font-medium text-white hover:text-blue-950 hover:bg-white hover:border-gray-300 border transition-all group"
                   >
-                    <Download className="h-4 w-4" />
+                    <Download className="h-4 w-4 group-hover:translate-y-0.5 transition-transform" />
                     Download Image
                   </button>
                 </div>
@@ -644,9 +711,72 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform animate-scaleIn">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <Trash2 size={24} className="text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Confirm Delete
+                  </h3>
+                  <p className="text-gray-500 text-sm">
+                    This action is permanent
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-red-50 border border-red-100 rounded-lg p-4 mb-6">
+                <p className="text-red-700 font-medium mb-2 flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4" />
+                 
+                </p>
+                <p className="text-red-600 text-sm">
+                  You're about to delete this image. All associated data will be permanently removed.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setIsDeleteModalOpen(false);
+                    setImageToDelete(null);
+                  }}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl font-medium transition-colors"
+                  disabled={isProcessing}
+                >
+                  Cancel
+                </button>
+                <button
+                  disabled={isProcessing}
+                  onClick={() => deleteImages([imageToDelete])}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 rounded-xl font-medium flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 size={18} />
+                      Delete Image
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn">
           <div className="w-full max-w-md animate-scaleIn rounded-2xl bg-white p-6 shadow-2xl">
             <div className="mb-6 text-center">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
@@ -669,7 +799,7 @@ export default function Dashboard() {
               </button>
               <button
                 onClick={handleLogout}
-                className="flex-1 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 px-4 py-3 font-medium text-white shadow-md transition-all hover:shadow-lg"
+                className="flex-1 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 px-4 py-3 font-medium text-white shadow-md transition-all hover:shadow-lg hover:scale-[1.02]"
               >
                 Yes, Logout
               </button>
@@ -679,13 +809,11 @@ export default function Dashboard() {
       )}
 
       <style jsx>{`
-        @keyframes slideIn {
+        @keyframes fadeIn {
           from {
-            transform: translateY(-10px);
             opacity: 0;
           }
           to {
-            transform: translateY(0);
             opacity: 1;
           }
         }
@@ -699,8 +827,8 @@ export default function Dashboard() {
             transform: scale(1);
           }
         }
-        .animate-slideIn {
-          animation: slideIn 0.3s ease-out;
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out;
         }
         .animate-scaleIn {
           animation: scaleIn 0.2s ease-out;
