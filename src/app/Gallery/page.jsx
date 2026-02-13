@@ -230,17 +230,8 @@ export default function Dashboard() {
                     <ImageIcon className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 text-blue-400" />
                   </div>
                 </div>
-                <h3 className="mb-2 text-xl font-semibold text-gray-800">Your gallery is empty</h3>
-                <p className="mb-6 max-w-md text-gray-500">
-                  Upload your first image to start building your collection.
-                </p>
-                <button 
-                  onClick={() => document.getElementById('file-upload')?.click()}
-                  className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-950 to-blue-950 px-5 py-2.5 font-medium text-white shadow-md hover:shadow-lg"
-                >
-                  <Upload className="h-4 w-4" />
-                  Upload First Image
-                </button>
+                <h3 className="mb-2 text-xl font-semibold text-gray-800">gallery is empty</h3>
+               
               </div>
             ) : (
               <>
