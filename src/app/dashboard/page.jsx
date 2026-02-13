@@ -64,7 +64,9 @@ function UploadBox({ onUploadSuccess }) {
     try {
       const formData = new FormData();
       formData.append("image", file);
-      formData.append("title", file.name);
+      // Remove extension from title
+      const titleWithoutExtension = file.name.split('.').slice(0, -1).join('.');
+      formData.append("title", titleWithoutExtension);
       formData.append("description", description);
 
       const res = await fetch("/api/admin/image", {
@@ -193,7 +195,7 @@ function UploadBox({ onUploadSuccess }) {
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Write a short description about this image..."
           rows={3}
-          className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-800 placeholder:font-sans     focus:border-blue-950 focus:outline-none focus:ring-2 focus:ring-blue-100"
+          className="w-full rounded-xl border border-gray-300 p-3 text-sm text-gray-800 placeholder:font-sans focus:border-blue-950 focus:outline-none focus:ring-2 focus:ring-blue-100"
         />
       </div>
 
@@ -537,7 +539,7 @@ export default function Dashboard() {
                             {/* Delete Button */}
                             <button
                               onClick={() => handleDeleteClick(img)}
-                              className="rounded-full  p-2 shadow-md backdrop-blur-sm transition-all hover:scale-110 bg-red-500 hover:text-white"
+                              className="rounded-full p-2 shadow-md backdrop-blur-sm transition-all hover:scale-110 bg-red-500 hover:bg-red-600 text-white"
                               title="Delete Image"
                             >
                               <Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
@@ -549,7 +551,12 @@ export default function Dashboard() {
                         <div className="p-3 md:p-4">
                           <div className="mb-2">
                             <h4 className="truncate text-sm font-semibold text-gray-900">
-                              {img.title || img.filename || `Image ${index + 1}`}
+                              {img.title 
+                                ? img.title.split('/').pop().split('.').slice(0, -1).join('.')
+                                : (img.filename 
+                                    ? img.filename.split('/').pop().split('.').slice(0, -1).join('.')
+                                    : `Image ${index + 1}`)
+                              }
                             </h4>
                             {img.description && (
                               <p className="mt-1 text-xs text-gray-500 line-clamp-2">
@@ -654,7 +661,14 @@ export default function Dashboard() {
                     <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
                       <div>
                         <p className="text-sm font-sans font-medium text-blue-950">Title</p>
-                        <p className="text-gray-900 break-words">{selectedImage.title || selectedImage.filename || "Untitled"}</p>
+                        <p className="text-gray-900 break-words">
+                          {selectedImage.title 
+                            ? selectedImage.title.split('/').pop().split('.').slice(0, -1).join('.')
+                            : (selectedImage.filename 
+                                ? selectedImage.filename.split('/').pop().split('.').slice(0, -1).join('.')
+                                : "Untitled")
+                          }
+                        </p>
                       </div>
                       {selectedImage.description && (
                         <div>
@@ -733,7 +747,7 @@ export default function Dashboard() {
               <div className="bg-red-50 border border-red-100 rounded-lg p-4 mb-6">
                 <p className="text-red-700 font-medium mb-2 flex items-center gap-2">
                   <AlertCircle className="h-4 w-4" />
-                 
+                  Warning: This cannot be undone!
                 </p>
                 <p className="text-red-600 text-sm">
                   You're about to delete this image. All associated data will be permanently removed.

@@ -288,8 +288,14 @@ export default function Dashboard() {
                         {/* Image Info */}
                         <div className="p-3 md:p-4">
                           <div className="mb-2">
-                            <h4 className="truncate text-sm font-semibold text-gray-900">
-                              {img.title || img.filename || `Image ${index + 1}`}
+                           
+                                <h4 className="truncate text-sm font-semibold text-gray-900">
+                              {img.title 
+                                ? img.title.split('/').pop().split('.').slice(0, -1).join('.')
+                                : (img.filename 
+                                    ? img.filename.split('/').pop().split('.').slice(0, -1).join('.')
+                                    : `Image ${index + 1}`)
+                              }
                             </h4>
                           </div>
                           
@@ -373,7 +379,12 @@ export default function Dashboard() {
                     <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
                       <div>
                         <p className="text-sm font-sans font-medium text-blue-950">Title</p>
-                        <p className="text-gray-900">{selectedImage.title || selectedImage.filename || "Untitled"}</p>
+                        <p className="text-gray-900"> {selectedImage.title 
+                            ? selectedImage.title.split('/').pop().split('.').slice(0, -1).join('.')
+                            : (selectedImage.filename 
+                                ? selectedImage.filename.split('/').pop().split('.').slice(0, -1).join('.')
+                                : "Untitled")
+                          }</p>
                       </div>
                       {selectedImage.description && (
                         <div>
